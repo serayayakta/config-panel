@@ -23,29 +23,41 @@
 
                     <!-- Value -->
                     <div class="sm:col-span-1">
-                        <div v-if="editingKey === item.key" class="flex gap-2 items-center">
+                        <div v-if="editingKey === item.key">
                             <input v-model="editedValue"
                                 class="bg-gray-800 text-sm rounded-md px-3 py-1 border border-gray-600 w-full sm:w-auto" />
-                            <button @click="saveEdit(item.key)"
-                                class="bg-green-500 hover:bg-green-600 text-sm px-3 py-1 rounded-md">Save</button>
-                            <button @click="cancelEdit" class="text-sm  hover:underline">Cancel</button>
                         </div>
                         <p v-else class="text-base break-all">{{ item.value }}</p>
                     </div>
 
+
                     <!-- Description -->
-                    <div class="text-sm sm:col-span-2">{{ item.description }}</div>
+                    <div class="sm:col-span-2">
+                        <div v-if="editingKey === item.key">
+                            <input v-model="editedDescription"
+                                class="bg-gray-800 text-sm rounded-md px-3 py-1 border border-gray-600 w-full" />
+                        </div>
+                        <p v-else class="text-sm">{{ item.description }}</p>
+                    </div>
 
                     <!-- Timestamp -->
                     <div class="text-xs  sm:text-right sm:col-span-1">{{ item.createdAt || '–' }}</div>
 
                     <!-- Actions -->
                     <div class="flex gap-4 sm:justify-end sm:col-span-1">
-                        <button @click="startEdit(item.key, item.value)"
-                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1 rounded-md">Edit</button>
-                        <button @click="deleteField(item.key)"
-                            class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-1 rounded-md">Delete</button>
+                        <template v-if="editingKey === item.key">
+                            <button @click="saveEdit(item.key)"
+                                class="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-md">Save</button>
+                            <button @click="cancelEdit" class="text-sm text-gray-400 hover:underline">Cancel</button>
+                        </template>
+                        <template v-else>
+                            <button @click="startEdit(item.key, item.value, item.description)"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1 rounded-md">Edit</button>
+                            <button @click="deleteField(item.key)"
+                                class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-1 rounded-md">Delete</button>
+                        </template>
                     </div>
+
 
                 </div>
             </div>
@@ -68,7 +80,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { db } from '../services/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteField as deleteFieldFirestore } from 'firebase/firestore';
 import AppNavbar from '../components/AppNavbar.vue';
 
 
@@ -78,6 +90,7 @@ const newValue = ref('');
 const newDesc = ref('');
 const editingKey = ref(null);
 const editedValue = ref('');
+const editedDescription = ref('');
 
 // 📥 Fetch config from Firestore
 onMounted(async () => {
@@ -86,46 +99,116 @@ onMounted(async () => {
 
     if (docSnap.exists()) {
         const data = docSnap.data();
-        config.value = Object.entries(data).map(([key, value]) => ({
+
+        config.value = Object.entries(data).map(([key, field]) => ({
             key,
-            value,
-            description: "Default description...",
+            value: field.value,
+            description: field.description || 'Default description...',
         }));
     }
 });
 
-const startEdit = (key, value) => {
+
+const startEdit = (key, value, description) => {
     editingKey.value = key;
     editedValue.value = value;
+    editedDescription.value = description;
 };
 
 const cancelEdit = () => {
     editingKey.value = null;
     editedValue.value = '';
+    editedDescription.value = '';
 };
 
 const saveEdit = async (key) => {
     const docRef = doc(db, 'config', 'main');
     try {
-        await updateDoc(docRef, { [key]: editedValue.value });
+        await updateDoc(docRef, {
+            [key]: {
+                value: editedValue.value,
+                description: editedDescription.value || 'Default description...',
+            },
+        });
+
 
         config.value = config.value.map((item) =>
-            item.key === key ? { ...item, value: editedValue.value } : item
+            item.key === key
+                ? {
+                    ...item,
+                    value: editedValue.value,
+                    description: editedDescription.value || 'Default description...',
+                }
+                : item
         );
 
         editingKey.value = null;
         editedValue.value = '';
+        editedDescription.value = '';
     } catch (err) {
         console.error("Error updating Firestore:", err);
         alert("Failed to save.");
     }
 };
 
-const deleteField = (key) => {
-    alert(`Delete: ${key}`);
+const deleteField = async (key) => {
+    const confirmDelete = confirm(`Delete parameter "${key}"?`);
+    if (!confirmDelete) return;
+
+    const docRef = doc(db, 'config', 'main');
+    try {
+        await updateDoc(docRef, {
+            [key]: deleteFieldFirestore(), // 🗑 actually removes field
+        });
+
+        // Update UI
+        config.value = config.value.filter((item) => item.key !== key);
+    } catch (err) {
+        console.error("Error deleting field:", err);
+        alert("Failed to delete.");
+    }
 };
 
-const addField = () => {
-    alert(`Add: ${newKey.value} → ${newValue.value} (${newDesc.value})`);
+const addField = async () => {
+    const key = newKey.value.trim();
+    const value = newValue.value.trim();
+
+    if (!key || !value) {
+        alert("Both key and value are required.");
+        return;
+    }
+
+    const docRef = doc(db, 'config', 'main');
+    try {
+        await updateDoc(docRef, {
+            [key]: {
+                value,
+                description: newDesc.value || 'Default description...',
+            },
+        });
+
+
+        config.value.push({
+            key,
+            value,
+            description: newDesc.value || 'Default description...',
+            createdAt: new Date().toLocaleString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+            }),
+        });
+
+        // Clear inputs
+        newKey.value = '';
+        newValue.value = '';
+        newDesc.value = '';
+    } catch (err) {
+        console.error("Error adding field:", err);
+        alert("Failed to add field.");
+    }
 };
+
 </script>
