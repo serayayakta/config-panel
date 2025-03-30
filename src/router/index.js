@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/HomePage.vue';
 import SignIn from '../views/SignIn.vue';
+import MobileConfigView from '../views/MobileConfig.vue';
 import { auth } from '../services/firebase';
 
 const routes = [
   { path: '/', component: Home, meta: { requiresAuth: true } },
-  { path: '/signin', component: SignIn }
+  { path: '/signin', component: SignIn },
+  {
+    path: '/mobile',
+    name: 'MobileConfig',
+    component: MobileConfigView,
+  },
 ];
 
 const router = createRouter({
