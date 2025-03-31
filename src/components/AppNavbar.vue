@@ -1,5 +1,5 @@
 <template>
-    <nav class="flex items-center justify-between px-12 py-4">
+    <nav class="flex items-center justify-between px-12 py-4 sm:px-1">
         <!-- Left: Logo -->
         <img src="/icon.png" alt="Logo" class="h-6" />
 
