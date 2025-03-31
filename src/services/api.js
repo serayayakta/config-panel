@@ -17,3 +17,30 @@ export async function fetchConfig() {
     return null;
   }
 }
+
+export async function updateConfig(key, value, description) {
+  const res = await fetch(`${API_URL}/config/${key}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({ value, description }),
+  });
+
+  if (!res.ok) throw new Error('Failed to update config');
+  return res.json();
+}
+
+export async function deleteConfig(key) {
+  const res = await fetch(`${API_URL}/config/${key}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+  });
+
+  if (!res.ok) throw new Error('Failed to DELETE config');
+  return res.json();
+}
