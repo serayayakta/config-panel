@@ -1,16 +1,36 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center px-4 bg-gray-50">
-        <form @submit.prevent="signIn" class="w-full max-w-sm bg-white p-6 rounded-xl shadow-md space-y-4">
-            <h2 class="text-xl font-semibold text-center">Admin Login</h2>
-            <input v-model="email" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-md"
-                required />
-            <input v-model="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-md"
-                required />
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
-                Login
-            </button>
-            <p v-if="error" class="text-red-500 text-sm text-center">{{ error }}</p>
-        </form>
+    <div class="min-h-screen flex flex-col items-center justify-center bg-[#121727] text-gray-500 font-inter px-4">
+
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img src="/icon.png" alt="Logo" class="h-36" />
+        </div>
+
+        <!-- Title -->
+        <h2 class="text-center text-lg text-[#404664] tracking-wide mt-10">Please sign in</h2>
+
+        <!-- Email -->
+        <input v-model="email" type="email" placeholder="E-mail address"
+            class="w-72 px-4 py-2 mt-4 rounded-t-md !bg-[#1c1f2c] text-gray-200 border border-[#404664] focus:border-[#e34bc7] text-sm placeholder-gray-400 focus:outline-none"
+            required />
+
+        <!-- Password -->
+        <input v-model="password" type="password" placeholder="Password" @keyup.enter="signIn"
+            class="w-72 px-4 py-2 rounded-b-md !bg-[#1c1f2c] border border-[#404664] focus:border-[#e34bc7] text-sm placeholder-gray-400 focus:outline-none"
+            required />
+
+        <!-- Button -->
+        <button @click="signIn"
+            class="w-72 mt-2 bg-gradient-to-r from-[#4f46e5] to-[#3b82f6] hover:opacity-90 text-white font-semibold py-2 rounded-md text-xs transition">
+            Sign in
+        </button>
+
+        <!-- Error -->
+        <p v-if="error" class="text-red-500 text-sm text-center">{{ error }}</p>
+
+        <!-- Footer -->
+        <p class="text-center text-xs text-gray-500 mt-14">Codeway © 2021</p>
+
     </div>
 </template>
 
@@ -33,12 +53,11 @@ const signIn = async () => {
         const token = await user.getIdToken();
 
         console.log("✅ Logged in UID:", user.uid);
-        console.log("🔐 Token:", token.slice(0, 20) + "..."); // for debugging
+        console.log("🔐 Token:", token.slice(0, 20) + "...");
 
         router.push('/');
     } catch (err) {
         error.value = "Invalid credentials";
     }
 };
-
 </script>
