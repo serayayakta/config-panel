@@ -116,15 +116,19 @@ const cancelEdit = () => {
 
 const saveEdit = async (key) => {
     try {
-        await updateConfig(key, editedValue.value, editedDescription.value);
+        const current = config.value[key];
+        await updateConfig(key, editedValue.value, editedDescription.value, current.updatedAt);
+
         config.value[key].value = editedValue.value;
         config.value[key].description = editedDescription.value;
+        config.value[key].updatedAt = new Date().toISOString();
         cancelEdit();
     } catch (err) {
         alert('Failed to save');
         console.error(err);
     }
 };
+
 
 const deleteConfigItem = async (key) => {
     try {

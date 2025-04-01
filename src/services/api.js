@@ -18,14 +18,14 @@ export async function fetchConfig() {
   }
 }
 
-export async function updateConfig(key, value, description) {
+export async function updateConfig(key, value, description, updatedAt) {
   const res = await fetch(`${API_URL}/config/${key}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': API_KEY,
     },
-    body: JSON.stringify({ value, description }),
+    body: JSON.stringify({ value, description, updatedAt }),
   });
 
   if (!res.ok) throw new Error('Failed to update config');
