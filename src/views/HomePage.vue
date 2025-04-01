@@ -6,7 +6,7 @@
         <div class="overflow-x-auto w-full">
             <div class="min-w-[768px] px-12 py-8">
                 <!-- ✅ Table Header -->
-                <div class="grid grid-cols-6 gap-4 text-xl text-[#778ba3] pb-2 mb-3 text-left">
+                <div class="grid grid-cols-6 gap-8 text-xl text-[#778ba3] pb-2 mb-3 text-left">
                     <div>Parameter Key</div>
                     <div>Value</div>
                     <div class="col-span-2">Description</div>
@@ -41,7 +41,10 @@
                         </div>
 
                         <!-- Timestamp -->
-                        <div class="text-xs  sm:text-right sm:col-span-1">{{ item.createdAt || '–' }}</div>
+                        <div class="sm:col-span-1">
+                            <p class="text-sm"> {{ item.createdAt ? new Date(item.createdAt).toLocaleString() : '–' }}
+                            </p>
+                        </div>
 
                         <!-- Actions -->
                         <div class="flex gap-4 justify-start sm:col-span-1">
@@ -110,6 +113,7 @@ onMounted(async () => {
             key,
             value: field.value,
             description: field.description || 'Default description...',
+            createdAt: field.createdAt || '–',
         }));
     }
 });
@@ -190,6 +194,8 @@ const addField = async () => {
             [key]: {
                 value,
                 description: newDesc.value || 'Default description...',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             },
         });
 
@@ -198,13 +204,8 @@ const addField = async () => {
             key,
             value,
             description: newDesc.value || 'Default description...',
-            createdAt: new Date().toLocaleString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-            }),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         });
 
         // Clear inputs
