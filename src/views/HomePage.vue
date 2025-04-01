@@ -3,75 +3,81 @@
         <!-- ✅ Top Navbar -->
         <AppNavbar />
 
-        <div class="px-12 py-8 mx-auto">
-            <!-- ✅ Table Header -->
-            <div class="hidden sm:grid grid-cols-6 gap-4 text-xl text-[#778ba3] pb-2 mb-3 text-left">
-                <div>Parameter Key</div>
-                <div>Value</div>
-                <div class="col-span-2">Description</div>
-                <div>Create Date ↓</div>
-                <div />
-            </div>
-
-            <!-- ✅ Config List -->
-            <div v-if="config.length" class="space-y-3 text-[#d2d2d5] text-left">
-                <div v-for="item in config" :key="item.key"
-                    class="grid grid-cols-1 sm:grid-cols-6 gap-8 items-start text-sm">
-
-                    <!-- Key -->
-                    <div class="font-medium sm:col-span-1">{{ item.key }}</div>
-
-                    <!-- Value -->
-                    <div class="sm:col-span-1">
-                        <div v-if="editingKey === item.key">
-                            <input v-model="editedValue"
-                                class="bg-gray-800 text-sm rounded-md px-3 py-1 border border-gray-600 w-full sm:w-auto" />
-                        </div>
-                        <p v-else class="text-base break-all">{{ item.value }}</p>
-                    </div>
-
-
-                    <!-- Description -->
-                    <div class="sm:col-span-2">
-                        <div v-if="editingKey === item.key">
-                            <input v-model="editedDescription"
-                                class="bg-gray-800 text-sm rounded-md px-3 py-1 border border-gray-600 w-full" />
-                        </div>
-                        <p v-else class="text-sm">{{ item.description }}</p>
-                    </div>
-
-                    <!-- Timestamp -->
-                    <div class="text-xs  sm:text-right sm:col-span-1">{{ item.createdAt || '–' }}</div>
-
-                    <!-- Actions -->
-                    <div class="flex gap-4 sm:justify-end sm:col-span-1">
-                        <template v-if="editingKey === item.key">
-                            <button @click="saveEdit(item.key)"
-                                class="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-md">Save</button>
-                            <button @click="cancelEdit" class="text-sm text-gray-400 hover:underline">Cancel</button>
-                        </template>
-                        <template v-else>
-                            <button @click="startEdit(item.key, item.value, item.description)"
-                                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1 rounded-md">Edit</button>
-                            <button @click="deleteField(item.key)"
-                                class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-1 rounded-md">Delete</button>
-                        </template>
-                    </div>
-
-
+        <div class="overflow-x-auto w-full">
+            <div class="min-w-[768px] px-12 py-8">
+                <!-- ✅ Table Header -->
+                <div class="grid grid-cols-6 gap-4 text-xl text-[#778ba3] pb-2 mb-3 text-left">
+                    <div>Parameter Key</div>
+                    <div>Value</div>
+                    <div class="col-span-2">Description</div>
+                    <div>Create Date ↓</div>
+                    <div />
                 </div>
-            </div>
 
-            <!-- ✅ Add New Row -->
-            <div class="grid grid-cols-1 sm:grid-cols-6 gap-8 items-center mt-8 text-sm">
-                <input v-model="newKey" placeholder="New Parameter"
-                    class="bg-transparent border border-gray-600 rounded-md px-3 py-1 text-white placeholder-gray-500 w-full" />
-                <input v-model="newValue" placeholder="Value"
-                    class="bg-transparent border border-gray-600 rounded-md px-3 py-1 text-white placeholder-gray-500 w-full" />
-                <input v-model="newDesc" placeholder="New Description"
-                    class="col-span-3 bg-transparent border border-gray-600 rounded-md px-3 py-1 text-white placeholder-gray-500 w-full" />
-                <button @click="addField"
-                    class="bg-cyan-400 hover:bg-cyan-500 text-white font-semibold rounded-md px-4 py-1 flex flex-wrap">ADD</button>
+                <!-- ✅ Config List -->
+                <div v-if="config.length" class="space-y-3 text-[#d2d2d5] text-left">
+                    <div v-for="item in config" :key="item.key" class="grid grid-cols-6 gap-8 items-start text-sm">
+
+                        <!-- Key -->
+                        <div class="font-medium sm:col-span-1">{{ item.key }}</div>
+
+                        <!-- Value -->
+                        <div class="sm:col-span-1">
+                            <div v-if="editingKey === item.key">
+                                <input v-model="editedValue"
+                                    class="bg-gray-800 text-sm rounded-md px-3 py-1 border border-gray-600 w-full sm:w-auto" />
+                            </div>
+                            <p v-else class="text-base break-all">{{ item.value }}</p>
+                        </div>
+
+
+                        <!-- Description -->
+                        <div class="sm:col-span-2">
+                            <div v-if="editingKey === item.key">
+                                <input v-model="editedDescription"
+                                    class="bg-gray-800 text-sm rounded-md px-3 py-1 border border-gray-600 w-full" />
+                            </div>
+                            <p v-else class="text-sm">{{ item.description }}</p>
+                        </div>
+
+                        <!-- Timestamp -->
+                        <div class="text-xs  sm:text-right sm:col-span-1">{{ item.createdAt || '–' }}</div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-4 justify-start sm:col-span-1">
+                            <template v-if="editingKey === item.key">
+                                <button @click="saveEdit(item.key)"
+                                    class="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-md">Save</button>
+                                <button @click="cancelEdit"
+                                    class="text-sm text-gray-400 hover:underline">Cancel</button>
+                            </template>
+                            <template v-else>
+                                <button @click="startEdit(item.key, item.value, item.description)"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1 rounded-md">Edit</button>
+                                <button @click="deleteField(item.key)"
+                                    class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-1 rounded-md">Delete</button>
+                            </template>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- ✅ Add New Row -->
+                <div class="grid grid-cols-6 gap-8 items-start mt-8 text-sm">
+                    <input v-model="newKey" placeholder="New Parameter"
+                        class="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-500 w-full" />
+                    <input v-model="newValue" placeholder="Value"
+                        class="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-500 w-full" />
+                    <input v-model="newDesc" placeholder="New Description"
+                        class="col-span-3 bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-500 w-full" />
+                    <div class="col-span-1 flex justify-start">
+                        <button @click="addField"
+                            class="bg-cyan-400 hover:bg-cyan-500 text-white text-sm px-4 py-1 rounded-md">
+                            ADD
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
